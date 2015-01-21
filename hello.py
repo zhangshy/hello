@@ -1,13 +1,31 @@
 from flask import Flask, flash, redirect, render_template, \
     request, url_for
+from flask.ext.wtf import Form
+from wtforms.fields import StringField, BooleanField
+from wtforms.validators import DataRequired
 
 app = Flask(__name__)
-app.secret_key = 'some_secret'
+#app.secret_key = 'some_secret'
+app.config.from_object('config')
+
+class LoginForm(Form):
+    openid = StringField('openid', validators=[DataRequired()])
+    remember_me = BooleanField('remember_me', default=True)
 
 
 @app.route('/')
 def index():
     return render_template('index.html')
+
+@app.route('/idlogin', methods=['GET', 'POST'])
+def idlogin():
+    form = LoginForm()
+    if form.validate_on_submit():
+        flash('Login requested for OpenID="' + form.openid.data + '", remember_me=' + str(form.remember_me.data))
+        return redirect(url_for('index'))
+    return render_template('idlogin.html',
+                    title = 'Sign In',
+                    form = form)
 
 @app.route('/login', methods=['GET', 'POST'])
 def login():
