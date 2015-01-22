@@ -3,10 +3,9 @@ from flask import Flask, flash, redirect, render_template, \
 from flask.ext.wtf import Form
 from wtforms.fields import StringField, BooleanField
 from wtforms.validators import DataRequired
+from flask.ext.sqlalchemy import SQLAlchemy
 
-app = Flask(__name__)
-#app.secret_key = 'some_secret'
-app.config.from_object('config')
+from blog import app
 
 class LoginForm(Form):
     openid = StringField('openid', validators=[DataRequired()])
@@ -53,6 +52,3 @@ def show_user_profile(username):
 def show_post(post_id):
     return 'Post %d' % post_id
 
-
-if __name__ == '__main__':
-    app.run(debug=True)

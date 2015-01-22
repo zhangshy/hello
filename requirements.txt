@@ -1,0 +1,13 @@
+flask
+flask-login
+flask-openid
+flask-mail
+flask-sqlalchemy
+sqlalchemy-migrate==0.9.0
+flask-whooshalchemy
+flask-wtf
+flask-babel
+guess_language
+flipflop
+coverage
+

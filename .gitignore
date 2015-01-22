@@ -1,2 +1,4 @@
 .idea/
 *.pyc
+blog.db
+db_repository/
