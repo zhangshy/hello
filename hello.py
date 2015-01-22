@@ -25,7 +25,8 @@ def idlogin():
         return redirect(url_for('index'))
     return render_template('idlogin.html',
                     title = 'Sign In',
-                    form = form)
+                    form = form,
+                    providers = app.config['OPENID_PROVIDERS'])
 
 @app.route('/login', methods=['GET', 'POST'])
 def login():
