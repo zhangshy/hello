@@ -12,18 +12,37 @@ class LoginForm(Form):
     openid = StringField('openid', validators=[DataRequired()])
     remember_me = BooleanField('remember_me', default=True)
 
-
-@app.route('/')
-def index():
-    return render_template('index.html')
-
 @lm.user_loader
 def load_user(id):
     return User.query.get(int(id))
 
-@app.route('/idlogin', methods=['GET', 'POST'])
-@oid.loginhandler()
-def idlogin():
+@app.before_request
+def before_request():
+    g.user = current_user
+
+
+@app.route('/')
+@app.route('/index')
+@login_required
+def index():
+    user = g.user
+    posts = [
+        {
+            'author': {'nickname': 'John'},
+            'body': 'Beautiful day in Portland!'
+        },
+        {
+            'author': {'nickname': 'Susan'},
+            'body': 'The Avengers movie was so cool'
+        }
+    ]
+    return render_template('index.html', title='Home', user=user, posts=posts)
+
+
+
+@app.route('/login', methods=['GET', 'POST'])
+@oid.loginhandler
+def login():
     if g.user is not None and g.user.is_authenticated():
         return redirect(url_for('index'))
     form = LoginForm()
@@ -31,7 +50,7 @@ def idlogin():
         session['remember_me'] = form.remember_me.data
 #        flash('Login requested for OpenID="' + form.openid.data + '", remember_me=' + str(form.remember_me.data))
         return oid.try_login(form.openid.data, ask_for=['nickname', 'email'])
-    return render_template('idlogin.html',
+    return render_template('login.html',
                     title = 'Sign In',
                     form = form,
                     providers = app.config['OPENID_PROVIDERS'])
@@ -40,7 +59,7 @@ def idlogin():
 def after_login(resp):
     if resp.email is None or resp.email == "":
         flash('Invalid login. Please try again.')
-        return redirect(url_for('idlogin'))
+        return redirect(url_for('login'))
     user = User.query.filter_by(email=resp.email).first()
     if user is None:
         nickname = resp.nickname
@@ -56,18 +75,11 @@ def after_login(resp):
     login_user(user, remember=remember_me)
     return redirect(request.args.get('next') or url_for('index'))
 
-@app.route('/login', methods=['GET', 'POST'])
-def login():
-    error = None
-    if request.method == 'POST':
-        if request.form['username'] != 'admin' or \
-            request.form['password'] != 'secret':
-            error = 'Invalid credentials'
-        else:
-            flash('You were successfully logged in')
-            return redirect(url_for('index'))
-    return render_template('login.html', error=error)
-
+@app.route('/logout')
+def logout():
+    logout_user()
+    return redirect(url_for('index'))
+	
 @app.route('/hello')
 @app.route('/hello/<name>')
 def hello(name=None):
