@@ -17,6 +17,7 @@
     </script>
     <h1>Sign In</h1>
     <form action="" method="post" name="id_login">
+        {% if error %}<p class=error><strong>Error:</strong> {{ error }}</p>{% endif %}
         {{ form.hidden_tag() }}
         <p>
             Please enter your OpenID, or select one of the providers below:<br>
